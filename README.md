@@ -38,7 +38,7 @@ $ npm run start:dev
 ```bash
 $ docker build . -t <username>/<nome_api>
 
-$ docker run -p 3000:8080 <username>/<nome_api>
+$ docker run -p 8080:3000 <username>/<nome_api>
 ```
 
 ## Endpoint
