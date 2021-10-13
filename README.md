@@ -1,73 +1,205 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+## Descrição
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Projeto realizado com o framework do Node.js, chamado NestJS.
+Diversas tecnologias também usadas através do framework:
+ - Mongoose (MongoDB)
+ - JWT;
+ - Passport
+ - Passport-local
+ - Class-validator
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Para rodar a API, necessário ter instalado Node.js, Docker, NestJS e NPM.
 
-## Description
+## Observações
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+ - Ao iniciar a API, é criado um usuário ADMIN padrão, retornando o username e senha no log;
+ - As configurações de conexão do MongoDB, porta de execução da API e dados do usuário ADMIN padrão estão no arquivo .env na pasta raiz;
+ - Todos os endpoints, exceto o login, necessita de autenticação;
+ - Para a importação da collection dos endpoints no Postman, há o arquivo MediaMonks.postman_collection.json; 
 
-## Installation
+## Instalação
 
 ```bash
 $ npm install
 ```
 
-## Running the app
+## Rodar API localhost
 
 ```bash
-# development
+# Desenvolvimento
 $ npm run start
 
-# watch mode
+# Modo em tempo real
 $ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
-## Test
+## Rodar API no Docker
 
 ```bash
-# unit tests
-$ npm run test
+$ docker build . -t <username>/<nome_api>
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+$ docker run -p 3000:8080 <username>/<nome_api>
 ```
 
-## Support
+## Endpoint
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Autenticação:
 
-## Stay in touch
+Retorna o token de autenticação para ser usado no header dos endpoints
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
+  curl --location --request POST 'localhost:8080/api/service/auth/login' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+      "username": "",
+      "password": ""
+  }'
+```
 
-## License
+Casos de erros:
+ - Preenchido email e/ou senha errados é retornado o status 400 (BadRequest)
 
-Nest is [MIT licensed](LICENSE).
+
+### Exibir seus dados (ADMIN):
+
+Retorna um objeto com os dados do usuário
+
+```
+  curl --location --request GET 'localhost:8080/api/service/master/profile/get' \ 
+  --header 'Authorization: Bearer <token>'
+```
+
+Casos de erros:
+ - Token ter expirado retorna o status 401 (Unauthorized)
+ - Usuário normal ter requisitado o endpoint retorna o status 403 (Forbidden)
+
+### Atualizar sua senha (ADMIN):
+
+Retorna um objeto com os dados preenchidos
+
+```
+  curl --location --request PUT 'localhost:8080/api/service/master/profile/update' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "password": ""
+  }'
+```
+
+Casos de erros:
+ - Token ter expirado retorna o status 401 (Unauthorized)
+ - Usuário normal ter requisitado o endpoint retorna o status 403 (Forbidden)
+ - Preenchido os dados fora das regras dos seus respectivos campos retorna o status 400 (BadRequest)
+
+ ### Criar usuário (ADMIN):
+
+Retorna um objeto com os dados preenchidos
+
+```
+  curl --location --request POST 'localhost:8080/api/service/master/user/create' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "",
+    "username": "",
+    "password": "",
+    "login_type": ""
+  }'
+```
+
+Casos de erros:
+ - Token ter expirado retorna o status 401 (Unauthorized)
+ - Usuário normal ter requisitado o endpoint retorna o status 403 (Forbidden)
+ - Preenchido os dados fora das regras dos seus respectivos campos retorna o status 400 (BadRequest)
+ - Username já existente não cria um novo usuário, porém retorna o status 201 (Created)
+
+ ### Deletar usuário (ADMIN):
+
+Não há retorno com o status 204 (No content)
+
+```
+  curl --location --request DELETE 'localhost:8080/api/service/master/user/delete/:idUser' \
+--header 'Authorization: Bearer <token>'
+```
+
+Casos de erros:
+ - Token ter expirado retorna o status 401 (Unauthorized)
+ - Usuário normal ter requisitado o endpoint retorna o status 403 (Forbidden)
+
+ ### Listar todos usuários (ADMIN):
+
+Retorna um array de objetos com os dados preenchidos
+
+```
+  curl --location --request GET 'localhost:8080/api/service/master/user/list' \
+--header 'Authorization: Bearer <token>'
+```
+
+Casos de erros:
+ - Token ter expirado retorna o status 401 (Unauthorized)
+ - Usuário normal ter requisitado o endpoint retorna o status 403 (Forbidden)
+
+ ### Listar todos usuários (ADMIN):
+
+Retorna um array de objetos com os dados preenchidos
+
+```
+  curl --location --request GET 'localhost:8080/api/service/master/user/list' \
+--header 'Authorization: Bearer <token>'
+```
+
+Casos de erros:
+ - Token ter expirado retorna o status 401 (Unauthorized)
+ - Usuário normal ter requisitado o endpoint retorna o status 403 (Forbidden)
+
+### Atualizar usuário (ADMIN):
+
+Retorna um objeto com os dados preenchidos do usuário.
+Apenas é possível atualizar o nome e o username
+
+```
+  curl --location --request PUT 'localhost:8080/api/service/master/user/update/:idUser' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "",
+    "username": ""
+  }'
+```
+
+Casos de erros:
+ - Token ter expirado retorna o status 401 (Unauthorized)
+ - Usuário normal ter requisitado o endpoint retorna o status 403 (Forbidden)
+ - Username já existente não cria um novo usuário e retorna o status 400 (BadRequest)
+ - Preenchido os dados fora das regras dos seus respectivos campos retorna o status 400 (BadRequest)
+
+ ### Exibir seus dados (USER):
+
+Retorna um objeto com os dados preenchidos do usuário
+
+```
+  curl --location --request GET 'localhost:8080/api/service/user/profile/get' \
+  --header 'Authorization: Bearer <token>'
+```
+
+Casos de erros:
+ - Token ter expirado retorna o status 401 (Unauthorized)
+ - Usuário ADMIN ter requisitado o endpoint retorna o status 403 (Forbidden)
+
+ ### Atualizar sua senha (USER):
+
+Retorna um objeto com os dados preenchidos do usuário
+
+```
+  curl --location --request PUT 'localhost:8080/api/service/user/profile/update' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+      "password": ""
+  }'
+```
+
+Casos de erros:
+ - Token ter expirado retorna o status 401 (Unauthorized)
+ - Usuário ADMIN ter requisitado o endpoint retorna o status 403 (Forbidden)
+ - Preenchido os dados fora das regras dos seus respectivos campos retorna o status 400 (BadRequest)
